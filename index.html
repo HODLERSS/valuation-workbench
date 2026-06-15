@@ -114,6 +114,7 @@ details[open].tcard .chev{transform:rotate(90deg);}
 .regime .rg{display:inline-flex;align-items:baseline;gap:6px;}
 .regime .rg b{font-family:"Playfair Display",serif;font-size:17px;color:var(--accent);font-weight:700;}
 .regime .rg .lab{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.ttm{font-size:8.5px;font-weight:700;color:var(--gold-ink);border:1px solid var(--gold-line,#d8cdb4);border-radius:3px;padding:0 3px;margin-left:2px;letter-spacing:.03em;vertical-align:1px;}
 .regime .sep{width:1px;height:22px;background:var(--line);}
 .regime .pill{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:11px;}
 .regime .pill.hot{background:#fdeceb;color:#b42318;}.regime .pill.warm{background:#fbf2dd;color:var(--gold-ink);}.regime .pill.cool{background:var(--green-tint);color:#067647;}
@@ -272,7 +273,7 @@ table.compact .colhide{display:none;}
 <th class="colhide"><button class="sort-btn" data-col="evFcf" data-type="num">EV/FCF</button></th>
 <th><button class="sort-btn" data-col="evUfcf" data-type="num">EV/uFCF</button><span class="info"><span class="q">i</span><span class="pop"><b>Unlevered FCF payback.</b> EV &divide; (EBITDA &minus; capex &minus; cash taxes). The truest "years to earn back the whole business," because it subtracts the capex EBITDA hides. <b>neg</b> = burns cash after capex (every miner/neocloud).</span></span></th>
 <th><button class="sort-btn" data-col="evEbitda" data-type="num">EV/EBITDA</button><span class="info"><span class="q">i</span><span class="pop"><b>Whole-business price vs pre-capex cash.</b> Flatters capital-heavy names because EBITDA ignores the capex needed to keep running &mdash; always read it next to EV/uFCF.</span></span></th>
-<th><button class="sort-btn" data-col="trailPE" data-type="num">P/E</button><span class="info"><span class="q">i</span><span class="pop"><b>Trailing P/E &mdash; price &divide; last-12-month <i>actual</i> EPS.</b> What the company has already earned, not a forecast. Sits <i>above</i> forward P/E when earnings are expected to grow. Watch the gap: for heavy stock-comp / acquisition-amortization names (e.g. CRM), trailing (GAAP) can run far above forward (non-GAAP consensus) &mdash; so the drop from trailing to forward is partly a basis switch, not just growth. <span class="nm">n.m.</span> for loss-makers / near-zero earnings.</span></span></th>
+<th><button class="sort-btn" data-col="trailPE" data-type="num">P/E&nbsp;TTM</button><span class="info"><span class="q">i</span><span class="pop"><b>Trailing P/E &mdash; price &divide; last-12-month <i>actual</i> EPS.</b> What the company has already earned, not a forecast. Sits <i>above</i> forward P/E when earnings are expected to grow. Watch the gap: for heavy stock-comp / acquisition-amortization names (e.g. CRM), trailing (GAAP) can run far above forward (non-GAAP consensus) &mdash; so the drop from trailing to forward is partly a basis switch, not just growth. <span class="nm">n.m.</span> for loss-makers / near-zero earnings.</span></span></th>
 <th><button class="sort-btn" data-col="fwdPE" data-type="num">Fwd P/E</button><span class="info"><span class="q">i</span><span class="pop"><b>Price &divide; next-12-month <i>expected</i> EPS.</b> Equity-only (after interest &amp; tax). Lower than trailing when earnings are expected to grow. Usually built on <b>non-GAAP</b> consensus, so compare it to the trailing column to see how much of the gap is real growth vs an accounting-basis change. Consensus EPS varies by source &mdash; cross-source gaps are flagged.</span></span></th>
 <th class="colhide"><button class="sort-btn" data-col="pb" data-type="num">P/B</button><span class="info"><span class="q">i</span><span class="pop"><b>Price &divide; book value.</b> The right lens for banks, insurers and BRK (where P/E and EV are distorted). Read with ROE: <b>P/E = P/B ÷ ROE</b>, so a high-ROE bank carries a low P/E. Noise for asset-light tech (book is mostly intangibles).</span></span></th>
 <th class="colhide"><button class="sort-btn" data-col="roe" data-type="num">ROE</button><span class="info"><span class="q">i</span><span class="pop"><b>Return on equity</b> = net income ÷ book equity. For financials this is the quality gauge that justifies the P/B: a 2&times; book is cheap at 18% ROE, dear at 8%.</span></span></th>
@@ -380,6 +381,7 @@ table.compact .colhide{display:none;}
 <tr><td><b>EV/uFCF</b></td><td>&hellip;the truest, capital-structure-neutral</td><td>EV</td><td>Unlevered FCF (EBITDA &minus; capex &minus; cash taxes)</td></tr>
 </tbody></table>
 <p>The rule: the value metric must match the cash that belongs to the same people. Net income is shareholders-only &rarr; pair with market cap (P/E). EBITDA/FCF belong to the whole business &rarr; pair with EV. Mismatching them (e.g. EV/net-income) compares a whole-business price to shareholder-only cash &mdash; apples to oranges.</p>
+<p><b>Trailing vs forward P/E &mdash; always check which one.</b> Throughout this product, <b>&ldquo;P/E (TTM)&rdquo;</b> is <b>trailing</b>: price &divide; the last 12 months of <i>actual</i> EPS. <b>&ldquo;Fwd P/E&rdquo;</b> is <b>forward</b>: price &divide; the next-12-month <i>consensus estimate</i> (usually non-GAAP). Forward sits below trailing when earnings are expected to grow &mdash; but mind the gap: for heavy stock-comp / acquisition-amortization names (e.g. <b>CRM</b>, trailing &asymp;19&times; vs forward &asymp;12&times;), much of the drop is a <b>GAAP&rarr;non-GAAP basis switch</b>, not pure growth. Compare like with like. The index figures in the regime banner and the Market tab are <b>trailing (TTM)</b>; the company table shows both side by side.</p>
 <p><b>Why EV/uFCF is the honest one</b> (and why I added it): EBITDA ignores the capex a business must spend to keep running. For asset-light software EBITDA &asymp; cash; for a datacenter, GPU neocloud, or bitcoin miner, EBITDA wildly overstates cash. Two divergences in the table are the signal:</p>
 <ul>
 <li><b>EV/uFCF &gt;&gt; EV/EBITDA &rarr; capex intensity.</b> GOOGL's EV/EBITDA 27 balloons to EV/uFCF 254 on AI-datacenter capex; CCJ (uranium) 69&rarr;164. Asset-light names (STNE, GLOB, INMD) show almost no gap.</li>
@@ -449,10 +451,10 @@ function gmatch(r){if(!GQ)return true;return (r.t||'').toLowerCase().includes(GQ
   const spPill=spPct>=90?'hot':spPct>=70?'warm':'cool';
   const el=document.querySelector('[data-regime]');
   el.innerHTML=
-    '<span class="rg"><span class="lab">S&amp;P 500 P/E</span> <b>'+spCur.toFixed(1)+'</b> '+
+    '<span class="rg"><span class="lab">S&amp;P 500 P/E <span class="ttm">TTM</span></span> <b>'+spCur.toFixed(1)+'</b> '+
       '<span class="pill '+spPill+'">'+spPct+'th pctile of 150y</span></span>'+
     '<span class="sep"></span>'+
-    '<span class="rg"><span class="lab">NASDAQ-100 P/E</span> <b>~'+ndxCur+'</b> <span class="lab">'+ndx.fwd+'x fwd</span></span>'+
+    '<span class="rg"><span class="lab">NASDAQ-100 P/E <span class="ttm">TTM</span></span> <b>~'+ndxCur+'</b> <span class="lab">'+ndx.fwd+'x fwd</span></span>'+
     '<span class="sep"></span>'+
     '<span class="rg"><span class="lab">'+DATA.length+'-name set vs own 5y</span> '+
       '<span class="band-chip cheap" style="margin-left:2px">'+cheap+' cheap</span> '+
@@ -484,7 +486,7 @@ function heatStrip(r){
     +'<line x1="'+xm+'" y1="2.5" x2="'+xm+'" y2="9.5" stroke="#b8b2a3" stroke-width="1"/>'
     +'<circle cx="'+xc+'" cy="6" r="3.2" fill="'+col+'" stroke="#fff" stroke-width="1"/></svg>';
   const lab=v.band==='nm'?'n/m':v.band==='stable'?'flat':v.pct;
-  const ml=v.metric.replace('evEbitda','EV/EBITDA').replace('evSales','EV/Sales').replace('evFcf','EV/FCF').replace('pfcf','P/FCF').replace('ps','P/S').replace('pe','P/E');
+  const ml=v.metric.replace('evEbitda','EV/EBITDA').replace('evSales','EV/Sales').replace('evFcf','EV/FCF').replace('pfcf','P/FCF').replace('ps','P/S').replace('pe','P/E (TTM)');
   const tail=v.band==='nm'?'range distorted by a near-zero-base year — percentile n/m':v.band==='stable'?('range too tight to read a percentile (flat ~'+med+'x)'):(v.pct+'th pctile (median '+med+'x)');
   const title=ml+' '+cur+'x · 5y range '+lo+'–'+hi+'x · '+tail;
   return '<span class="hs" title="'+title+'">'+svg+'<span class="pc '+v.band+'">'+lab+'</span></span>';
@@ -537,7 +539,7 @@ renderFund();
 
 function fmtM(v){if(v==null)return '<span class="nm">&mdash;</span>';const s=Math.abs(v)>=1000?(v/1000).toFixed(1)+'B':Math.round(v).toLocaleString('en-US')+'M';return '<span class="'+(v<0?'neg':'')+'">'+(v<0?'&minus;':'')+s.replace('-','')+'</span>';}
 function spark(vals){const p=vals.filter(v=>v!=null);if(p.length<2)return '';const w=64,h=16,mn=Math.min(...p),mx=Math.max(...p),rg=(mx-mn)||1,st=w/(p.length-1);const d=p.map((v,i)=>(i*st).toFixed(1)+','+(h-((v-mn)/rg)*h).toFixed(1)).join(' ');const up=p[p.length-1]>=p[0];return '<svg class="spark" width="'+w+'" height="'+h+'"><polyline fill="none" stroke="'+(up?'#067647':'#b42318')+'" stroke-width="1.4" points="'+d+'"/></svg>';}
-const MLAB={evEbitda:'EV/EBITDA',evSales:'EV/Sales',evFcf:'EV/FCF',pe:'P/E',ps:'P/S',pb:'P/B',pfcf:'P/FCF',fwdPE:'Fwd P/E',trailPE:'P/E (TTM)'};
+const MLAB={evEbitda:'EV/EBITDA',evSales:'EV/Sales',evFcf:'EV/FCF',pe:'P/E (TTM)',ps:'P/S',pb:'P/B',pfcf:'P/FCF',fwdPE:'Fwd P/E',trailPE:'P/E (TTM)'};
 function median(a){const s=[...a].sort((x,y)=>x-y),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):null;}
 function applicableMetrics(vh){return ['evEbitda','evSales','evFcf','pe','ps','pb','pfcf'].filter(m=>(vh[m]||[]).filter(v=>v!=null&&v>0).length>=2);}
 function suppressReason(r){
