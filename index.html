@@ -272,7 +272,8 @@ table.compact .colhide{display:none;}
 <th class="colhide"><button class="sort-btn" data-col="evFcf" data-type="num">EV/FCF</button></th>
 <th><button class="sort-btn" data-col="evUfcf" data-type="num">EV/uFCF</button><span class="info"><span class="q">i</span><span class="pop"><b>Unlevered FCF payback.</b> EV &divide; (EBITDA &minus; capex &minus; cash taxes). The truest "years to earn back the whole business," because it subtracts the capex EBITDA hides. <b>neg</b> = burns cash after capex (every miner/neocloud).</span></span></th>
 <th><button class="sort-btn" data-col="evEbitda" data-type="num">EV/EBITDA</button><span class="info"><span class="q">i</span><span class="pop"><b>Whole-business price vs pre-capex cash.</b> Flatters capital-heavy names because EBITDA ignores the capex needed to keep running &mdash; always read it next to EV/uFCF.</span></span></th>
-<th><button class="sort-btn" data-col="fwdPE" data-type="num">Fwd P/E</button><span class="info"><span class="q">i</span><span class="pop"><b>Price &divide; next-12-month expected EPS.</b> Equity-only (after interest &amp; tax). Lower than trailing when earnings are expected to grow. Consensus EPS varies by source &mdash; cross-source gaps are flagged.</span></span></th>
+<th><button class="sort-btn" data-col="trailPE" data-type="num">P/E</button><span class="info"><span class="q">i</span><span class="pop"><b>Trailing P/E &mdash; price &divide; last-12-month <i>actual</i> EPS.</b> What the company has already earned, not a forecast. Sits <i>above</i> forward P/E when earnings are expected to grow. Watch the gap: for heavy stock-comp / acquisition-amortization names (e.g. CRM), trailing (GAAP) can run far above forward (non-GAAP consensus) &mdash; so the drop from trailing to forward is partly a basis switch, not just growth. <span class="nm">n.m.</span> for loss-makers / near-zero earnings.</span></span></th>
+<th><button class="sort-btn" data-col="fwdPE" data-type="num">Fwd P/E</button><span class="info"><span class="q">i</span><span class="pop"><b>Price &divide; next-12-month <i>expected</i> EPS.</b> Equity-only (after interest &amp; tax). Lower than trailing when earnings are expected to grow. Usually built on <b>non-GAAP</b> consensus, so compare it to the trailing column to see how much of the gap is real growth vs an accounting-basis change. Consensus EPS varies by source &mdash; cross-source gaps are flagged.</span></span></th>
 <th class="colhide"><button class="sort-btn" data-col="pb" data-type="num">P/B</button><span class="info"><span class="q">i</span><span class="pop"><b>Price &divide; book value.</b> The right lens for banks, insurers and BRK (where P/E and EV are distorted). Read with ROE: <b>P/E = P/B ÷ ROE</b>, so a high-ROE bank carries a low P/E. Noise for asset-light tech (book is mostly intangibles).</span></span></th>
 <th class="colhide"><button class="sort-btn" data-col="roe" data-type="num">ROE</button><span class="info"><span class="q">i</span><span class="pop"><b>Return on equity</b> = net income ÷ book equity. For financials this is the quality gauge that justifies the P/B: a 2&times; book is cheap at 18% ROE, dear at 8%.</span></span></th>
 <th class="colhide"><button class="sort-btn" data-col="evSales" data-type="num">EV/Sales</button></th>
@@ -305,7 +306,7 @@ table.compact .colhide{display:none;}
 <h2>Value map &mdash; cheap for its growth?</h2>
 <div class="note">Every name plotted by <b>valuation</b> (vertical) against <b>growth</b> (horizontal). Lower-right is the sweet spot: cheap <i>and</i> growing. Up-left is dear for the growth. Color = sector cluster; hover a point for the name and numbers. Switch the axes to test different lenses. Index/private and negative-multiple names are excluded.</div>
 <div class="scatter-wrap">
-<div class="axsel">Y&nbsp;<div class="dnsty" data-yaxis><button data-y="evEbitda" class="on">EV/EBITDA</button><button data-y="evSales">EV/Sales</button><button data-y="fwdPE">Fwd P/E</button></div>
+<div class="axsel">Y&nbsp;<div class="dnsty" data-yaxis><button data-y="evEbitda" class="on">EV/EBITDA</button><button data-y="evSales">EV/Sales</button><button data-y="trailPE">P/E</button><button data-y="fwdPE">Fwd P/E</button></div>
 &nbsp;&nbsp;&nbsp;X&nbsp;<div class="dnsty" data-xaxis><button data-x="revGr" class="on">Rev growth</button><button data-x="cagr">3y CAGR</button></div></div>
 <div class="cmpbar"><span class="cmplab">Compare</span><div class="cmpchips" data-cmpchips></div><div class="cmpinput-wrap"><input type="search" data-cmpinput placeholder="add ticker&hellip; or click points" aria-label="Add ticker to compare" autocomplete="off"><div class="cmpdrop" data-cmpdrop hidden></div></div><button class="cmpclear" data-cmpclear hidden>Clear</button></div>
 <svg viewBox="0 0 1000 460" data-scatter></svg>
@@ -502,7 +503,7 @@ function valRow(r){return '<tr>'+
 '<td class="colhide">'+fmtB(r.mcap)+'</td><td class="colhide">'+fmtB(r.ev)+'</td>'+
 '<td class="colhide">'+ndCell(r.netDebt)+'</td><td class="colhide">'+fmtX(r.evFcf)+'</td>'+
 '<td>'+fmtUfcf(r)+'</td><td>'+fmtX(r.evEbitda)+'</td>'+
-'<td>'+fmtX(r.fwdPE)+'</td><td class="colhide">'+fmtX(r.pb)+'</td><td class="colhide">'+(r.roe==null?'<span class="nm">&mdash;</span>':r.roe.toFixed(0)+'%')+'</td><td class="colhide">'+fmtX(r.evSales)+'</td><td>'+fmtPct(r.fcfYld)+'</td>'+
+'<td>'+fmtX(r.trailPE)+'</td><td>'+fmtX(r.fwdPE)+'</td><td class="colhide">'+fmtX(r.pb)+'</td><td class="colhide">'+(r.roe==null?'<span class="nm">&mdash;</span>':r.roe.toFixed(0)+'%')+'</td><td class="colhide">'+fmtX(r.evSales)+'</td><td>'+fmtPct(r.fcfYld)+'</td>'+
 '<td>'+fmtPct(r.revGr)+'</td><td class="colhide">'+(r.div==null||r.div===0?'<span class="nm">&mdash;</span>':r.div.toFixed(1)+'%')+'</td>'+
 '<td><span class="conf '+(r.conf||'medium')+'">'+(r.conf||'?')+'</span></td></tr>';}
 function renderVal(){let rows=DATA.filter(r=>(valState.tiers.size===0||valState.tiers.has(r.tier))&&gmatch(r)&&(CMP.size===0||CMP.has(r.t)));
@@ -536,7 +537,7 @@ renderFund();
 
 function fmtM(v){if(v==null)return '<span class="nm">&mdash;</span>';const s=Math.abs(v)>=1000?(v/1000).toFixed(1)+'B':Math.round(v).toLocaleString('en-US')+'M';return '<span class="'+(v<0?'neg':'')+'">'+(v<0?'&minus;':'')+s.replace('-','')+'</span>';}
 function spark(vals){const p=vals.filter(v=>v!=null);if(p.length<2)return '';const w=64,h=16,mn=Math.min(...p),mx=Math.max(...p),rg=(mx-mn)||1,st=w/(p.length-1);const d=p.map((v,i)=>(i*st).toFixed(1)+','+(h-((v-mn)/rg)*h).toFixed(1)).join(' ');const up=p[p.length-1]>=p[0];return '<svg class="spark" width="'+w+'" height="'+h+'"><polyline fill="none" stroke="'+(up?'#067647':'#b42318')+'" stroke-width="1.4" points="'+d+'"/></svg>';}
-const MLAB={evEbitda:'EV/EBITDA',evSales:'EV/Sales',evFcf:'EV/FCF',pe:'P/E',ps:'P/S',pb:'P/B',pfcf:'P/FCF',fwdPE:'Fwd P/E'};
+const MLAB={evEbitda:'EV/EBITDA',evSales:'EV/Sales',evFcf:'EV/FCF',pe:'P/E',ps:'P/S',pb:'P/B',pfcf:'P/FCF',fwdPE:'Fwd P/E',trailPE:'P/E (TTM)'};
 function median(a){const s=[...a].sort((x,y)=>x-y),n=s.length;return n?(n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2):null;}
 function applicableMetrics(vh){return ['evEbitda','evSales','evFcf','pe','ps','pb','pfcf'].filter(m=>(vh[m]||[]).filter(v=>v!=null&&v>0).length>=2);}
 function suppressReason(r){
