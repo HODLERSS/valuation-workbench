@@ -323,7 +323,7 @@ table.compact .colhide{display:none;}
 <div class="dnsty" data-mktrange><button data-r="2">2y</button><button data-r="5" class="on">5y</button><button data-r="10">10y</button><button data-r="30">30y</button><button data-r="160">Full</button></div>
 <div class="dnsty" data-mktscale><button data-s="lin" class="on">Linear</button><button data-s="log">Log</button></div>
 <div class="dnsty" data-mktmetric><button data-m="pe" class="on">P/E</button><button data-m="ps">P/S</button><button data-m="pb">P/B</button></div>
-<div class="cmpbar" style="margin:0"><span class="cmplab">Overlay</span><div class="cmpchips" data-mktchips></div><div class="cmpinput-wrap"><input type="search" data-mktinput placeholder="add a stock&hellip;" aria-label="Add stock to market chart" autocomplete="off"><div class="cmpdrop" data-mktdrop hidden></div></div><button class="cmpclear" data-mktclear hidden>Clear</button></div>
+<div class="cmpbar" style="margin:0"><span class="cmplab">Overlay</span><div class="cmpchips" data-cmpchips></div><div class="cmpinput-wrap"><input type="search" data-cmpinput placeholder="add a stock&hellip;" aria-label="Add stock to compare set" autocomplete="off"><div class="cmpdrop" data-cmpdrop hidden></div></div><button class="cmpclear" data-cmpclear hidden>Clear</button></div>
 </div>
 <div class="legend" data-mktlegend></div>
 <div class="chartwrap"><svg viewBox="0 0 1000 440" data-market></svg></div>
@@ -750,6 +750,7 @@ function cmpRender(){
   if(lg)lg.innerHTML=CMP.size?[...CMP].map(t=>{const r=byT[t];if(!r)return '';const y=r[yAxis],x=r[xAxis];
     return '<span class="ci"><b>'+t+'</b> '+MLAB[yAxis]+' '+(y!=null?y.toFixed(1)+'x':'<span class="nm">n/a</span>')+' · '+(xAxis==='revGr'?'rev gr ':'CAGR ')+(x!=null?Math.round(x)+'%':'n/a')+' <button data-cmprm="'+t+'" aria-label="remove">&times;</button></span>';}).join(''):'';
   renderScatter(yAxis,xAxis);renderTraj(GQ,curTier);renderFund();renderVal();
+  if(typeof renderMarket==='function')renderMarket();   // selection also overlays on the Market tab
 }
 function cmpAdd(t){if(byT[t]){CMP.add(t);cmpRender();}}
 function cmpToggle(t){if(!byT[t])return;CMP.has(t)?CMP.delete(t):CMP.add(t);cmpRender();}
@@ -769,7 +770,7 @@ document.querySelector('[data-scatternote]').innerHTML='The dashed gold line is 
 
 // ===== Market Valuation chart: monthly S&P 500 + NASDAQ-100 for P/E · P/S · P/B + stock overlay =====
 const mktSvg=document.querySelector('[data-market]');
-let MKT=new Set(),mktRange=5,mktScale='lin',mktMetric='pe';
+let mktRange=5,mktScale='lin',mktMetric='pe';
 function ymF(ym){return +ym.slice(0,4)+(+ym.slice(5,7)-1)/12;}
 const LASTF=ymF(PEM.asOf),STKCOL=['#b07a73','#3f6b1f','#8a6da0','#9c5a3f','#4a8c79','#6a8caf','#a8804f'];
 const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],MKTLAB={pe:'P/E',ps:'P/S',pb:'P/B'};
@@ -798,16 +799,22 @@ function renderMarket(){const W=1000,H=440,PADL=46,PADR=58,PADT=16,PADB=30,to=LA
   const from=Math.max(LASTF-mktRange,dataStart);
   const spPts=spK.filter(k=>ymF(k)>=from-0.05).map(k=>({x:ymF(k),v:spD[k],ym:k}));
   const ndxPts=ndxK.filter(k=>ymF(k)>=from-0.05).map(k=>({x:ymF(k),v:ndxD[k],ym:k}));
-  const sel=[...MKT].map((t,i)=>({t,col:STKCOL[i%STKCOL.length],pts:mktStockPts(t,from)})).filter(s=>s.pts&&s.pts.length);
+  // overlay set = the shared compare basket (CMP): a name selected on any tab also overlays here
+  const sel=[...CMP].filter(t=>byT[t]).map((t,i)=>({t,col:STKCOL[i%STKCOL.length],pts:mktStockPts(t,from)})).filter(s=>s.pts&&s.pts.length);
   const sN=PEM.stats[M].sp,nN=PEM.stats[M].ndx;
-  let allv=spPts.map(p=>p.v).concat(ndxPts.map(p=>p.v));sel.forEach(s=>s.pts.forEach(p=>allv.push(p.v)));
-  mktSvg.innerHTML='';if(!allv.length)return;
+  const idxv=spPts.map(p=>p.v).concat(ndxPts.map(p=>p.v));
+  const selv=[];sel.forEach(s=>s.pts.forEach(p=>selv.push(p.v)));
+  mktSvg.innerHTML='';if(!idxv.length&&!selv.length)return;
+  const selHi=selv.length?Math.max.apply(null,selv):0,selLo=selv.length?Math.min.apply(null,selv):Infinity;
   const logY=mktScale==='log';let ymin,ymax;
-  if(logY){ymin=Math.max(0.5,pctile(allv,0.01)*0.85);ymax=pctile(allv,0.99)*1.12;}
-  else{ymin=0;
-    // clip rare spikes (e.g. 2009 GFC trailing-P/E ~123, an earnings-collapse artifact) but always fit every current value
-    const cur=[sN?sN.cur:0,nN?nN.cur:0].concat(sel.map(s=>s.pts[s.pts.length-1].v));
-    ymax=Math.max(pctile(allv,0.98)*1.08,Math.max.apply(null,cur)*1.12);
+  if(logY){
+    // clip rare index spikes (2009 GFC P/E ~123) via percentile, but ALWAYS fit the selected overlay's full range
+    const floorIdx=Math.max(0.5,(idxv.length?pctile(idxv,0.02):1)*0.9);
+    ymin=Math.max(0.5,Math.min(floorIdx,selv.length?selLo*0.92:floorIdx));
+    ymax=Math.max(idxv.length?pctile(idxv,0.98):0,selHi)*1.10;
+  }else{ymin=0;
+    const cur=[sN?sN.cur:0,nN?nN.cur:0];
+    ymax=Math.max((idxv.length?pctile(idxv,0.98):0)*1.08,Math.max.apply(null,cur)*1.12,selHi*1.08);
     const st=niceStep(ymax);ymax=Math.ceil(ymax/st)*st;}
   const lmn=Math.log10(Math.max(0.1,ymin)),lmx=Math.log10(ymax);
   const X=x=>PADL+(x-from)/((to-from)||1)*(W-PADL-PADR);
@@ -871,25 +878,9 @@ function renderMarket(){const W=1000,H=440,PADL=46,PADR=58,PADT=16,PADB=30,to=LA
   if(sel.length){const rel=sel.map(s=>{const p=mktStockPts(s.t,from);const cur=p&&p.length?p[p.length-1].v:null;return cur&&cur>0?s.t+' <b style="color:'+s.col+'">'+(cur/sN.cur).toFixed(2)+'&times;</b>':null;}).filter(Boolean).join(' &middot; ');
     if(rel)note+='<br><b>'+ML+' vs the S&amp;P right now</b> (1.0&times; = same as the market): '+rel+'.';}
   document.querySelector('[data-mktnote]').innerHTML=note;}
-function mktRender(){const ch=document.querySelector('[data-mktchips]');ch.innerHTML=[...MKT].map(t=>'<span class="cmpchip">'+t+'<button data-mktrm="'+t+'" aria-label="remove '+t+'">&times;</button></span>').join('');document.querySelector('[data-mktclear]').hidden=MKT.size===0;renderMarket();}
-function mktAdd(t){const r=byT[t];if(r&&mktHasData(r)){MKT.add(t);
-  const pes=((r.vq&&r.vq.pe)||[]).map(p=>p[1]).concat((r.vh&&r.vh.pe)||[]);
-  if(mktScale==='lin'&&pes.some(v=>v>55)){mktScale='log';document.querySelectorAll('[data-mktscale] button').forEach(x=>x.classList.toggle('on',x.dataset.s==='log'));}
-  mktRender();}}
 document.querySelectorAll('[data-mktrange] button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-mktrange] button').forEach(x=>x.classList.toggle('on',x===b));mktRange=+b.dataset.r;renderMarket();}));
 document.querySelectorAll('[data-mktscale] button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-mktscale] button').forEach(x=>x.classList.toggle('on',x===b));mktScale=b.dataset.s;renderMarket();}));
 document.querySelectorAll('[data-mktmetric] button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-mktmetric] button').forEach(x=>x.classList.toggle('on',x===b));mktMetric=b.dataset.m;renderMarket();}));
-const mi=document.querySelector('[data-mktinput]'),md=document.querySelector('[data-mktdrop]');
-function mktSuggest(q){q=(q||'').trim().toLowerCase();if(!q){md.hidden=true;return;}
-  const ms=DATA.filter(r=>mktHasData(r)&&!MKT.has(r.t)&&((r.t||'').toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q))).slice(0,8);
-  if(!ms.length){md.hidden=true;return;}
-  md.innerHTML=ms.map((r,i)=>'<button data-mktadd="'+r.t+'"'+(i===0?' class="on"':'')+'><span class="dt">'+r.t+'</span><span class="dn">'+(r.name||'')+'</span></button>').join('');md.hidden=false;}
-mi.addEventListener('input',e=>mktSuggest(e.target.value));
-mi.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const f=md.querySelector('button');if(f&&!md.hidden){mktAdd(f.dataset.mktadd);mi.value='';md.hidden=true;}}else if(e.key==='Escape')md.hidden=true;});
-md.addEventListener('click',e=>{const b=e.target.closest('button[data-mktadd]');if(b){mktAdd(b.dataset.mktadd);mi.value='';md.hidden=true;mi.focus();}});
-document.addEventListener('click',e=>{if(!e.target.closest('[data-mktinput]')&&!e.target.closest('[data-mktdrop]'))md.hidden=true;});
-document.querySelector('[data-panel="market"]').addEventListener('click',e=>{const b=e.target.closest('[data-mktrm]');if(b){MKT.delete(b.dataset.mktrm);mktRender();}});
-document.querySelector('[data-mktclear]').addEventListener('click',()=>{MKT.clear();mktRender();});
 renderMarket();
 
 // ===== global search: one box, every surface =====
