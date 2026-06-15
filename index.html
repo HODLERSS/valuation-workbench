@@ -787,9 +787,13 @@ function mktStockPts(t,from){const r=byT[t];if(!r)return null;let pts=[];
     cols.forEach((c,j)=>{if(c==='Current')return;const v=arr[j];if(v==null||v<=0)return;const x=+c+0.95;if(x<earliestQ-0.3)pts.push({x,v});});}
   pts.sort((a,b)=>a.x-b.x);return pts.filter(p=>p.x>=from-1.2);}
 function mktHasData(r){return (r.vq&&(r.vq.pe||r.vq.ps||r.vq.pb))||(r.vh&&(r.vh.pe||r.vh.ps||r.vh.pb));}
-function renderMarket(){const W=1000,H=440,PADL=46,PADR=58,PADT=16,PADB=30,from=LASTF-mktRange,to=LASTF+0.12;
+function renderMarket(){const W=1000,H=440,PADL=46,PADR=58,PADT=16,PADB=30,to=LASTF+0.12;
   const M=mktMetric,spD=PEM[M].sp||{},ndxD=PEM[M].ndx||{};
   const spK=Object.keys(spD).sort(),ndxK=Object.keys(ndxD).sort();
+  // begin the x-axis where this metric's data actually starts (P/S & P/B only go back ~2000/2006),
+  // so long ranges don't show empty space to the left of the earliest data point
+  const dataStart=Math.min(spK.length?ymF(spK[0]):1e9,ndxK.length?ymF(ndxK[0]):1e9);
+  const from=Math.max(LASTF-mktRange,dataStart);
   const spPts=spK.filter(k=>ymF(k)>=from-0.05).map(k=>({x:ymF(k),v:spD[k],ym:k}));
   const ndxPts=ndxK.filter(k=>ymF(k)>=from-0.05).map(k=>({x:ymF(k),v:ndxD[k],ym:k}));
   const sel=[...MKT].map((t,i)=>({t,col:STKCOL[i%STKCOL.length],pts:mktStockPts(t,from)})).filter(s=>s.pts&&s.pts.length);
