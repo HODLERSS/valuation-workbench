@@ -261,8 +261,8 @@ html{scroll-padding-top:116px;}
 <div class="topnav-tools">
 <div class="gsearch"><svg class="gs-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg><input type="search" data-globalsearch placeholder="Search any ticker, name, or sector…" aria-label="Search all stocks" autocomplete="off"><span class="gcount" data-gcount></span><kbd class="gs-kbd">/</kbd></div>
 <div class="watch-row" data-mktwatch>
-<div class="mkt-cap"><span class="mkt-status"><span class="mkt-dot" data-mkt-dot></span><span data-mkt-label>&mdash;</span></span><span class="mkt-sub"><span data-mkt-clock>--:--</span> ET&nbsp;&middot;&nbsp;<span data-mkt-note>&mdash;</span></span></div>
-<svg class="watch watch-sm" viewBox="0 0 100 100" data-watch role="img" aria-label="US market clock (Eastern Time)"><circle cx="50" cy="50" r="49" fill="none" stroke="#8f7340" stroke-width="1"/><circle cx="50" cy="50" r="47.2" fill="#0d3b2e" stroke="#c5a572" stroke-width="2.4"/><g data-ticks></g><g data-hand-hour><line x1="50" y1="55" x2="50" y2="28" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g><g data-hand-minute><line x1="50" y1="56" x2="50" y2="17" stroke="#f4f1e8" stroke-width="2.6" stroke-linecap="round"/></g><g data-hand-second><line x1="50" y1="61" x2="50" y2="13" stroke="#d4af37" stroke-width="1.1" stroke-linecap="round"/></g><circle data-center cx="50" cy="50" r="2.8" fill="#c5a572"/></svg>
+<div class="mkt-cap"><span class="mkt-status"><span class="mkt-dot" data-mkt-dot></span><span data-mkt-label>&mdash;</span></span><span class="mkt-sub"><span data-mkt-clock>--:--</span> CT&nbsp;&middot;&nbsp;<span data-mkt-note>&mdash;</span></span></div>
+<svg class="watch watch-sm" viewBox="0 0 100 100" data-watch role="img" aria-label="US market clock (Central Time)"><circle cx="50" cy="50" r="49" fill="none" stroke="#8f7340" stroke-width="1"/><circle cx="50" cy="50" r="47.2" fill="#0d3b2e" stroke="#c5a572" stroke-width="2.4"/><g data-ticks></g><g data-hand-hour><line x1="50" y1="55" x2="50" y2="28" stroke="#f4f1e8" stroke-width="4" stroke-linecap="round"/></g><g data-hand-minute><line x1="50" y1="56" x2="50" y2="17" stroke="#f4f1e8" stroke-width="2.6" stroke-linecap="round"/></g><g data-hand-second><line x1="50" y1="61" x2="50" y2="13" stroke="#d4af37" stroke-width="1.1" stroke-linecap="round"/></g><circle data-center cx="50" cy="50" r="2.8" fill="#c5a572"/></svg>
 </div>
 </div>
 </div>
@@ -970,8 +970,11 @@ if(_topnav){const onScroll=()=>_topnav.classList.toggle('stuck',window.scrollY>4
   function nextTrading(y,m,d){let dt=new Date(Date.UTC(y,m-1,d));for(let i=0;i<9;i++){dt=new Date(dt.getTime()+86400000);const Y=dt.getUTCFullYear(),Mo=dt.getUTCMonth()+1,D=dt.getUTCDate();if(trading(Y,Mo,D))return[Y,Mo,D];}return[y,m,d];}
   const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const etFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  // Displayed clock = Central Time; market open/closed + countdown stay ET (NYSE).
+  const ctFmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hourCycle:'h23',hour:'2-digit',minute:'2-digit',second:'2-digit'});
   const reduce=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   function et(now){const p={};for(const x of etFmt.formatToParts(now))if(x.type!=='literal')p[x.type]=+x.value;return p;}
+  function ctp(now){const p={};for(const x of ctFmt.formatToParts(now))if(x.type!=='literal')p[x.type]=+x.value;return p;}
   function f12(h,mi){const ap=h>=12?'PM':'AM';let hh=h%12;if(!hh)hh=12;return hh+':'+pad(mi)+' '+ap;}
   function hm(m){const h=Math.floor(m/60),mm=m%60;return (h?h+'h ':'')+mm+'m';}
   function compute(now){
@@ -990,7 +993,7 @@ if(_topnav){const onScroll=()=>_topnav.classList.toggle('stuck',window.scrollY>4
     return {cls,label,sub,h:e.hour,mi:e.minute};
   }
   function render(){
-    const now=new Date(),e=et(now),ms=reduce?0:now.getMilliseconds();
+    const now=new Date(),e=ctp(now),ms=reduce?0:now.getMilliseconds();
     const sec=e.second+ms/1000,minF=e.minute+sec/60,hrF=(e.hour%12)+minF/60;
     sH.setAttribute('transform','rotate('+(sec*6)+' 50 50)');
     mH.setAttribute('transform','rotate('+(minF*6)+' 50 50)');
